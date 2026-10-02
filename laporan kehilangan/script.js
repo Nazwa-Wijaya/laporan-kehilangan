@@ -17,13 +17,47 @@ const CATS = [
   "Lainnya",
 ];
 const LOCS = [
-  "Fakultas Teknik",
-  "Fakultas Ekonomi",
-  "Perpustakaan pusat",
-  "Kantin utama",
-  "Masjid kampus",
-  "Parkiran timur",
-  "Gedung serbaguna",
+  "Gedung A - Ruang kelas",
+  "Gedung A - Toilet lantai 1",
+  "Gedung A - Toilet lantai 2",
+  "Gedung A - Toilet lantai 3",
+  "Gedung A - Toilet lantai 4",
+  "Gedung A - Musholah lantai 1",
+  "Gedung A - Musholah lantai 2",
+  "Gedung A - Musholah lantai 3",
+  "Gedung A - Musholah lantai 4",
+  "Gedung A - Parkiran belakang",
+  "Gedung A - Lab 1",
+  "Gedung A - Lab 2",
+  "Gedung A - Lab 3",
+  "Gedung A - Lab 4",
+  "Gedung A - Lab Teknik Industri",
+  "Gedung A - Ruang pertemuan",
+  "Gedung A - Ruang inkubator",
+  "Gedung A - Poliklinik",
+  "Gedung A - Lainnya",
+  "Gedung B - Ruang kelas",
+  "Gedung B - Toilet lantai 1",
+  "Gedung B - Toilet lantai 2",
+  "Gedung B - Toilet lantai 3",
+  "Gedung B - Toilet lantai 4",
+  "Gedung B - Musholah lantai 1",
+  "Gedung B - Musholah lantai 2",
+  "Gedung B - Musholah lantai 4",
+  "Gedung B - Parkiran",
+  "Gedung B - Perpustakaan",
+  "Gedung B - Galeri FSD",
+  "Gedung B - Ruang pertemuan",
+  "Gedung B - Poliklinik",
+  "Gedung B - Galeri investasi",
+  "Gedung B - Studio FTV",
+  "Gedung B - Bank Sumut",
+  "Gedung B - Aula",
+  "Gedung B - Microteaching",
+  "Gedung B - Lab HI",
+  "Gedung B - LIFT",
+  "Gedung B - Bioskop",
+  "Gedung B - Lainnya",
 ];
 
 const d = (n) => {
@@ -90,7 +124,7 @@ let DB = {
       cat: CATS[0],
       color: "Hitam",
       brand: "Eiger",
-      loc: LOCS[0],
+      loc: "Gedung A - Ruang kelas 305",
       date: d(1),
       desc: "Berisi KTM, SIM, dan kartu ATM. Ada gantungan kunci kecil di resleting.",
       status: "ACTIVE",
@@ -103,7 +137,7 @@ let DB = {
       cat: CATS[3],
       color: "Perak",
       brand: "Honda",
-      loc: LOCS[5],
+      loc: "Gedung A - Parkiran belakang",
       date: d(2),
       desc: "Gantungan boneka beruang biru.",
       status: "PENDING",
@@ -115,7 +149,7 @@ let DB = {
       cat: CATS[1],
       color: "Putih",
       brand: "Xiaomi",
-      loc: LOCS[2],
+      loc: "Gedung B - Perpustakaan",
       date: d(3),
       desc: "Case ada stiker huruf D.",
       status: "FOUND",
@@ -128,7 +162,7 @@ let DB = {
       cat: CATS[4],
       color: "Abu-abu",
       brand: "Uniqlo",
-      loc: LOCS[3],
+      loc: "Gedung B - Aula",
       date: d(8),
       desc: "Ukuran M, ada noda tinta di lengan kiri.",
       status: "EXPIRED",
@@ -141,19 +175,20 @@ let DB = {
       cat: CATS[5],
       color: "Hitam",
       brand: "Casio",
-      loc: LOCS[1],
+      loc: "Gedung B - Ruang kelas 201",
       date: d(5),
       desc: "Tertulis nama di bagian belakang.",
       status: "RETURNED",
       appr: d(4),
     },
   ],
+  msgs: [],
   found: [
     {
       id: 1,
       name: "Earbuds putih dengan case",
       cat: CATS[1],
-      loc: LOCS[2],
+      loc: "Gedung B - Perpustakaan",
       date: d(2),
       status: "Dicocokkan",
     },
@@ -161,14 +196,24 @@ let DB = {
       id: 2,
       name: "Dompet hitam",
       cat: CATS[0],
-      loc: LOCS[0],
+      loc: "Gedung A - Ruang kelas 305",
       date: d(0),
       status: "Tersimpan",
     },
   ],
 };
 
-let ST = { user: null, auth: "login", view: "", q: "", fc: "", fl: "", fs: "" };
+let ST = {
+  user: null,
+  auth: "login",
+  view: "",
+  q: "",
+  fc: "",
+  fl: "",
+  fs: "",
+  chat: null,
+  draft: "",
+};
 
 const $ = (s) => document.querySelector(s);
 const uname = (id) => (DB.users.find((u) => u.id === id) || {}).name || "-";
@@ -197,14 +242,59 @@ const exp = (r) => {
   return e;
 };
 
+const locOf = (f) =>
+  f.l.value + (f.kn && f.kn.value.trim() ? " " + f.kn.value.trim() : "");
+
+const locOpts = (g) =>
+  LOCS.filter((x) => x.startsWith(g + " - "))
+    .map((x) => `<option value="${x}">${x.slice(g.length + 3)}</option>`)
+    .join("");
+
+function gdg(e) {
+  const f = e.form;
+  f.l.innerHTML = locOpts(e.value);
+  f.kn.value = "";
+  kls(f.l);
+}
+
+function kls(e) {
+  const f = e.form,
+    on = /Ruang kelas$/.test(e.value),
+    n = e.value.startsWith("Gedung A") ? 4 : 3;
+  f.querySelector(".kn").style.display = on ? "" : "none";
+  f.querySelector(".kn label").textContent = `Nomor ruang kelas (${n} digit)`;
+  f.kn.required = on;
+  f.kn.maxLength = n;
+  f.kn.minLength = n;
+  f.kn.pattern = `[0-9]{${n}}`;
+  f.kn.title = `Isi ${n} digit angka`;
+  f.kn.placeholder = n === 4 ? "Contoh: 1305" : "Contoh: 305";
+  if (!on) f.kn.value = "";
+}
+
 const nav = (v) => {
   ST.view = v;
-  ST.q = ST.fc = ST.fl = ST.fs = "";
+  ST.q = ST.fc = ST.fl = ST.fs = ST.fg = "";
   render();
 };
 
 function render() {
-  ST.user ? app() : auth();
+  if (ST.user) return app();
+  const h = location.hash;
+  h === "#/masuk" || h === "#/admin" ? auth() : beranda();
+}
+
+function beranda() {
+  $("#root").innerHTML =
+    `<div style="background:var(--side);color:#fff;padding:14px clamp(16px,4vw,40px);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">${logo}</div><main id="main" style="margin:0 auto"></main>`;
+  V.forum();
+}
+
+function goLogin(m) {
+  ST.auth = "login";
+  if (m) toast(m);
+  location.hash = "#/masuk";
+  render();
 }
 
 window.addEventListener("hashchange", () => {
@@ -232,14 +322,14 @@ function auth() {
       `<div class="adm"><div class="card">${logo}<h2 style="margin:0 0 4px;font-size:22px">Masuk petugas</h2><p class="sub">Khusus admin dan pihak kampus.</p>
 <form onsubmit="event.preventDefault();doAdmin()"><div class="f"><label>Nama pengguna</label><input id="au" placeholder="Masukkan nama pengguna" autocomplete="off"></div>
 <div class="f"><label>Kata sandi</label>${pw("ap")}</div><button class="btn block">Masuk ke panel admin</button></form>
-<p class="hint"><a href="#/">Kembali ke halaman masuk mahasiswa</a></p></div></div>`;
+<p class="hint"><a href="#/masuk">Kembali ke halaman masuk mahasiswa</a></p></div></div>`;
     return;
   }
   const reg = ST.auth === "reg";
   $("#root").innerHTML =
     `<div class="auth"><div class="hero"><div>${logo.replace("<div", "<div style='margin-bottom:56px'")}<h1>Barang hilang kembali ke pemilik lewat satu pintu resmi.</h1><p>Laporkan kehilangan, pantau statusnya, dan ambil barang Anda setelah petugas memverifikasi kepemilikan.</p></div>
 <ol class="steps"><li><em>1</em><span><b>Buat laporan</b>Isi ciri barang, lokasi, dan foto.</span></li><li><em>2</em><span><b>Diverifikasi petugas</b>Laporan tampil di forum setelah disetujui.</span></li><li><em>3</em><span><b>Ambil barang</b>Petugas menghubungi Anda bila barang cocok.</span></li></ol></div>
-<div class="pane"><div class="box"><div class="tabs"><button class="${reg ? "" : "on"}" onclick="ST.auth='login';render()">Masuk</button><button class="${reg ? "on" : ""}" onclick="ST.auth='reg';render()">Daftar</button></div>
+<div class="pane"><div class="box"><button type="button" class="btn ghost sm" style="margin-bottom:16px" onclick="location.hash='#/'">&larr; Kembali ke beranda</button><div class="tabs"><button class="${reg ? "" : "on"}" onclick="ST.auth='login';render()">Masuk</button><button class="${reg ? "on" : ""}" onclick="ST.auth='reg';render()">Daftar</button></div>
 <h2>${reg ? "Buat akun mahasiswa" : "Selamat datang"}</h2><p class="sub">${reg ? "Satu NIM hanya dapat memiliki satu akun." : "Masuk menggunakan NIM dan kata sandi Anda."}</p>
 <form onsubmit="event.preventDefault();doAuth()">${reg ? `<div class="f"><label>Nama lengkap</label><input id="rn" placeholder="Masukkan nama lengkap" autocomplete="off"></div>` : ""}
 <div class="f"><label>NIM</label><input id="nim" inputmode="numeric" placeholder="Masukkan NIM" autocomplete="off"></div>
@@ -293,14 +383,80 @@ function logout() {
   render();
 }
 
+const esc = (s) =>
+  String(s).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
+const fmtT = (x) =>
+  new Date(x).toLocaleString("id-ID", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+function unread() {
+  const a = ST.user.role === "admin";
+  return DB.msgs.filter(
+    (m) =>
+      !m.read &&
+      (a ? m.from === "user" : m.from === "admin" && m.uid === ST.user.id),
+  ).length;
+}
+
+function markRead() {
+  const a = ST.user.role === "admin",
+    uid = a ? ST.chat : ST.user.id;
+  DB.msgs.forEach((m) => {
+    if (m.uid === uid && m.from === (a ? "user" : "admin")) m.read = true;
+  });
+}
+
+function sendM(f) {
+  const t = f.t.value.trim();
+  if (!t) return;
+  const a = ST.user.role === "admin";
+  DB.msgs.push({
+    id: Date.now(),
+    uid: a ? ST.chat : ST.user.id,
+    from: a ? "admin" : "user",
+    text: t,
+    at: new Date(),
+    read: false,
+  });
+  app();
+  const i = $(".cf textarea");
+  if (i) i.focus();
+}
+
+function chatWith(uid, rid) {
+  const r = DB.reports.find((x) => x.id === rid);
+  ST.chat = uid;
+  ST.draft = r ? `Mengenai laporan "${r.name}": ` : "";
+  const e = $("dialog");
+  if (e && e.open) e.close();
+  nav("pesan");
+}
+
 function app() {
   const a = ST.user.role === "admin",
     pend = DB.reports.filter((r) => r.status === "PENDING").length,
     fnd = DB.reports.filter((r) => r.status === "FOUND").length;
+  if (ST.view === "pesan") {
+    if (a && !ST.chat)
+      ST.chat = (DB.users.find((u) => u.role === "user") || {}).id;
+    markRead();
+  }
+  const unr = unread();
   const M = a
     ? [
         ["Utama"],
         ["dash", "Dashboard"],
+        ["pesan", "Pesan", unr],
         ["Laporan"],
         ["masuk", "Laporan masuk", pend],
         ["forum", "Forum"],
@@ -316,6 +472,7 @@ function app() {
         ["forum", "Forum Lost & Found"],
         ["lapor", "Laporkan barang hilang"],
         ["saya", "Laporan saya"],
+        ["pesan", "Pesan", unr],
         ["profil", "Profil"],
       ];
   if (!ST.view) ST.view = M.find((m) => m[1])[0];
@@ -329,12 +486,21 @@ const head = (t, p, x = "") =>
   `<div class="head"><div><h1>${t}</h1><p>${p}</p></div>${x}</div>`;
 const sel = (k, arr, ph, lab) =>
   `<select onchange="ST.${k}=this.value;V.forum()"><option value="">${ph}</option>${arr.map((o) => `<option value="${o}" ${ST[k] === o ? "selected" : ""}>${lab ? lab[o] : o}</option>`).join("")}</select>`;
+const locFilter = () =>
+  `<select onchange="ST.fg=this.value;ST.fl='';V.forum()"><option value="">Semua gedung</option>${["Gedung A", "Gedung B"].map((g) => `<option value="${g}" ${ST.fg === g ? "selected" : ""}>${g}</option>`).join("")}</select><select ${ST.fg ? "" : "disabled"} onchange="ST.fl=this.value;V.forum()"><option value="">Semua lokasi</option>${LOCS.filter(
+    (x) => ST.fg && x.startsWith(ST.fg + " - "),
+  )
+    .map(
+      (x) =>
+        `<option value="${x}" ${ST.fl === x ? "selected" : ""}>${x.slice(ST.fg.length + 3)}</option>`,
+    )
+    .join("")}</select>`;
 const tbl = (cols, rows) =>
   `<div class="card tw"><table><thead><tr>${cols.map((c) => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.length ? rows.join("") : `<tr><td colspan="${cols.length}" class="empty">Belum ada data.</td></tr>`}</tbody></table></div>`;
 
 const V = {
   forum() {
-    const adm = ST.user.role === "admin";
+    const adm = !!ST.user && ST.user.role === "admin";
     const l = DB.reports
       .filter((r) =>
         ST.fs
@@ -347,15 +513,19 @@ const V = {
             .toLowerCase()
             .includes(ST.q.toLowerCase()) &&
           (!ST.fc || r.cat === ST.fc) &&
-          (!ST.fl || r.loc === ST.fl),
+          (!ST.fg || r.loc.startsWith(ST.fg + " - ")) &&
+          (!ST.fl || r.loc === ST.fl || r.loc.startsWith(ST.fl + " ")),
       );
 
     $("#main").innerHTML =
       head(
         "Forum Lost & Found",
         "Laporan barang hilang yang sudah diverifikasi dan masih berlaku.",
+        ST.user
+          ? ""
+          : "<button class='btn' onclick=\"goLogin('Silakan masuk untuk melaporkan barang hilang.')\">Laporkan barang</button>",
       ) +
-      `<div class="bar"><input id="sq" placeholder="Cari nama barang, merk, atau deskripsi" value="${ST.q}" oninput="ST.q=this.value;clearTimeout(window.tm);window.tm=setTimeout(()=>{V.forum();const i=$('#sq');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)">${sel("fc", CATS, "Semua kategori")}${sel("fl", LOCS, "Semua lokasi")}${sel("fs", adm ? Object.keys(S) : ["ACTIVE", "FOUND"], "Semua status", S)}</div>` +
+      `<div class="bar"><input id="sq" placeholder="Cari nama barang, merk, atau deskripsi" value="${ST.q}" oninput="ST.q=this.value;clearTimeout(window.tm);window.tm=setTimeout(()=>{V.forum();const i=$('#sq');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)">${sel("fc", CATS, "Semua kategori")}${locFilter()}${sel("fs", adm ? Object.keys(S) : ["ACTIVE", "FOUND"], "Semua status", S)}</div>` +
       (l.length
         ? `<div class="grid">${l.map((r) => `<div class="card item" onclick="detail(${r.id})"><div class="ph">${ic(IC.photo)}${badge(r.status)}</div><div class="b"><h3>${r.name}</h3><div class="meta">${r.cat}</div><div class="meta">${r.loc}</div><div class="meta">Hilang ${fmt(r.date)}</div></div></div>`).join("")}</div>`
         : `<div class="card empty">Tidak ada laporan yang sesuai dengan pencarian.</div>`);
@@ -368,7 +538,7 @@ const V = {
       ) +
       `<form class="card pad form" onsubmit="event.preventDefault();sendR(this)"><div class="f"><label>Nama barang</label><input name="n" required placeholder="Contoh: Dompet kulit"></div><div class="f"><label>Kategori</label><select name="c">${opts(CATS)}</select></div>
 <div class="f"><label>Warna</label><input name="w" required placeholder="Contoh: Hitam"></div><div class="f"><label>Merk (jika ada)</label><input name="b" placeholder="Contoh: Eiger"></div>
-<div class="f"><label>Tanggal kehilangan</label><input type="date" name="d" required value="2026-09-30"></div><div class="f"><label>Lokasi terakhir</label><select name="l">${opts(LOCS)}</select></div>
+<div class="f"><label>Tanggal kehilangan</label><input type="date" name="d" required value="2026-09-30"></div><div class="f"><label>Gedung</label><select name="g" onchange="gdg(this)"><option>Gedung A</option><option>Gedung B</option></select></div><div class="f"><label>Lokasi terakhir</label><select name="l" onchange="kls(this)">${locOpts("Gedung A")}</select></div><div class="f kn"><label>Nomor ruang kelas (4 digit)</label><input name="kn" inputmode="numeric" autocomplete="off" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Isi 4 digit angka" placeholder="Contoh: 1305" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
 <div class="f w"><label>Foto barang</label><input type="file" accept="image/*"></div><div class="f w"><label>Deskripsi dan ciri khusus</label><textarea name="ds" required placeholder="Tuliskan ciri khas yang hanya diketahui pemilik"></textarea></div>
 <div class="w"><button class="btn">Kirim laporan</button></div></form>`;
   },
@@ -442,9 +612,9 @@ const V = {
         "Barang ditemukan",
         "Catat barang yang diserahkan penemu ke petugas.",
       ) +
-      `<form class="card pad form" style="margin-bottom:22px" onsubmit="event.preventDefault();const f=this;DB.found.unshift({id:Date.now(),name:f.n.value,cat:f.c.value,loc:f.l.value,date:NOW,status:'Tersimpan'});toast('Barang temuan dicatat');V.temuan()">
+      `<form class="card pad form" style="margin-bottom:22px" onsubmit="event.preventDefault();const f=this;DB.found.unshift({id:Date.now(),name:f.n.value,cat:f.c.value,loc:locOf(f),date:NOW,status:'Tersimpan'});toast('Barang temuan dicatat');V.temuan()">
 <div class="f"><label>Nama barang</label><input name="n" required placeholder="Contoh: Kunci motor"></div><div class="f"><label>Kategori</label><select name="c">${opts(CATS)}</select></div>
-<div class="f"><label>Lokasi ditemukan</label><select name="l">${opts(LOCS)}</select></div><div class="f"><label>Foto</label><input type="file"></div>
+<div class="f"><label>Gedung</label><select name="g" onchange="gdg(this)"><option>Gedung A</option><option>Gedung B</option></select></div><div class="f"><label>Lokasi ditemukan</label><select name="l" onchange="kls(this)">${locOpts("Gedung A")}</select></div><div class="f kn"><label>Nomor ruang kelas (4 digit)</label><input name="kn" inputmode="numeric" autocomplete="off" required maxlength="4" minlength="4" pattern="[0-9]{4}" title="Isi 4 digit angka" placeholder="Contoh: 1305" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div><div class="f"><label>Foto</label><input type="file"></div>
 <div class="f w"><label>Deskripsi</label><textarea name="ds" placeholder="Kondisi dan ciri barang saat diterima"></textarea></div><div class="w"><button class="btn">Simpan barang temuan</button></div></form>` +
       tbl(
         ["Barang", "Kategori", "Lokasi", "Tanggal", "Status"],
@@ -479,9 +649,52 @@ const V = {
           .filter((r) => r.status === "FOUND")
           .map((r) => {
             const u = DB.users.find((x) => x.id === r.uid) || {};
-            return `<tr><td>${u.name}<div class="meta">NIM ${u.nim}</div></td><td>${r.name}</td><td>Hubungi pelapor</td><td><button class="btn sm" onclick="verif(${r.id})">Verifikasi dan serahkan</button></td></tr>`;
+            return `<tr><td>${u.name}<div class="meta">NIM ${u.nim}</div></td><td>${r.name}</td><td><button class="btn ghost sm" onclick="chatWith(${r.uid},${r.id})">Hubungi pelapor</button></td><td><button class="btn sm" onclick="verif(${r.id})">Verifikasi dan serahkan</button></td></tr>`;
           }),
       );
+  },
+  pesan() {
+    const a = ST.user.role === "admin",
+      me = a ? "admin" : "user",
+      uid = a ? ST.chat : ST.user.id,
+      us = DB.users.filter((u) => u.role === "user"),
+      list = DB.msgs.filter((m) => m.uid === uid),
+      last = (id) => DB.msgs.filter((m) => m.uid === id).slice(-1)[0],
+      un = (id) =>
+        DB.msgs.filter((m) => m.uid === id && m.from === "user" && !m.read)
+          .length;
+    const side = a
+      ? `<div class="clist">${us
+          .map((u) => {
+            const l = last(u.id),
+              n = un(u.id);
+            return `<button class="cu ${u.id === uid ? "on" : ""}" onclick="ST.chat=${u.id};app()"><span><b>${esc(u.name)}</b><div class="meta">${l ? esc(l.text) : "Belum ada pesan"}</div></span>${n ? `<span class="cnt">${n}</span>` : ""}</button>`;
+          })
+          .join("")}</div>`
+      : "";
+    const draft = ST.draft;
+    ST.draft = "";
+    const thread = uid
+      ? `<div class="cth"><div class="who">${esc(a ? uname(uid) : "Petugas Kemahasiswaan")}</div><div class="cb" id="cb">${
+          list.length
+            ? list
+                .map(
+                  (m) =>
+                    `<div class="msg ${m.from === me ? "me" : ""}">${esc(m.text)}<time>${fmtT(m.at)}</time></div>`,
+                )
+                .join("")
+            : `<div class="empty">Belum ada pesan. Mulai percakapan di bawah.</div>`
+        }</div><form class="cf" onsubmit="event.preventDefault();sendM(this)"><textarea name="t" required placeholder="Tulis pesan" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.requestSubmit()}">${esc(draft)}</textarea><button class="btn">Kirim</button></form></div>`
+      : `<div class="empty">Belum ada mahasiswa terdaftar.</div>`;
+    $("#main").innerHTML =
+      head(
+        "Pesan",
+        a
+          ? "Balas pesan dari mahasiswa atau mulai percakapan baru."
+          : "Hubungi petugas kemahasiswaan terkait laporan Anda.",
+      ) + `<div class="card chat ${a ? "" : "solo"}">${side}${thread}</div>`;
+    const cb = $("#cb");
+    if (cb) cb.scrollTop = cb.scrollHeight;
   },
   users() {
     $("#main").innerHTML =
@@ -517,7 +730,7 @@ function sendR(f) {
     cat: f.c.value,
     color: f.w.value,
     brand: f.b.value,
-    loc: f.l.value,
+    loc: locOf(f),
     date: new Date(f.d.value),
     desc: f.ds.value,
     status: "PENDING",
@@ -549,8 +762,8 @@ function detail(id) {
   const r = DB.reports.find((x) => x.id === id);
   if (!r) return;
   dlg(`<div class="ph" style="border-radius:8px;margin-bottom:16px">${ic(IC.photo)}</div>${badge(r.status)}<h2 style="margin-top:8px">${r.name}</h2><p class="meta" style="margin:0 0 16px">${r.cat}</p>
-<dl class="dl"><dt>Warna</dt><dd>${r.color || "-"}</dd><dt>Merk</dt><dd>${r.brand || "-"}</dd><dt>Lokasi terakhir</dt><dd>${r.loc}</dd><dt>Tanggal hilang</dt><dd>${fmt(r.date)}</dd><dt>Deskripsi</dt><dd>${r.desc}</dd>${ST.user.role === "admin" ? `<dt>Pelapor</dt><dd>${uname(r.uid)}</dd>` : ""}${r.appr ? `<dt>Berlaku sampai</dt><dd>${fmt(exp(r))}</dd>` : ""}</dl>
-<div class="foot"><button class="btn ghost" onclick="$('dialog').close()">Tutup</button></div>`);
+<dl class="dl"><dt>Warna</dt><dd>${r.color || "-"}</dd><dt>Merk</dt><dd>${r.brand || "-"}</dd><dt>Lokasi terakhir</dt><dd>${r.loc}</dd><dt>Tanggal hilang</dt><dd>${fmt(r.date)}</dd><dt>Deskripsi</dt><dd>${r.desc}</dd>${ST.user && ST.user.role === "admin" ? `<dt>Pelapor</dt><dd>${uname(r.uid)}</dd>` : ""}${r.appr ? `<dt>Berlaku sampai</dt><dd>${fmt(exp(r))}</dd>` : ""}</dl>
+<div class="foot"><button class="btn ghost" onclick="$('dialog').close()">Tutup</button>${ST.user && (ST.user.role === "admin" || ST.user.id === r.uid) ? `<button class="btn" onclick="chatWith(${r.uid},${r.id})">${ST.user.role === "admin" ? "Hubungi pelapor" : "Hubungi admin"}</button>` : ""}</div>`);
 }
 
 function verif(id) {
