@@ -1902,6 +1902,60 @@ function rejectFoundItem(id) {
     app();
   }
 }
+const canDelete = () =>
+  ST.user && (ST.user.role === "admin" );
+
+const canDeleteFound = (f) =>
+  ST.user &&
+(ST.user.role === "admin" || (ST.user.role === "petugas" && f.received_by.includes(ST.user.name)));
+
+function closeDlg(){
+  const e = $("dialog");
+  if (e && e.open) e.close();
+}
+
+function deleteReport(id){
+  if (!canDelete()) return toast("Anda tidak memiliki izin untuk menghapus Laporan.");
+  const r = DB.reports.find((x) => x.id === id);
+  if (!r) return;
+  if (!confirm(`Hapus Laporan "${r.name}" secara permanen?\nTindakan ini dapat dibatalkan.`)) return;
+  DB.matches 
+   .filter((m) => m.lost_report_id === id)
+   .forEach((m) => {
+    const f = DB.found.find((x) => x.id === m.found_item_id);
+    if (f && f.status === "MATCHED") f.status = "APPROVED";
+  });
+  DB.matches = DB.matches.filter((m) => m.lost_report_id !== id);
+  DB.returns = DB.returns.filter((x) => x.lost_report_id !== id);
+  DB.reports = DB.reports.filter((x) => x.id !== id);
+  DB.msgs.forEach((m) => {
+    if (m.rid === id) m.rid = null;
+  });
+  if (ST.chatReportId === id) ST.chatReportId = null;
+  saveDB();
+  closeDlg();
+  toast("Laporan Kehilangan berhasil dihapus");
+  render();
+}
+
+function deleteFound(id){
+  const f = DB.found.find((x) => x.id === id);
+  if (!f) return;
+  if (!canDeleteFound(f)) return toast("Anda tidak memiliki izin untuk menghapus barang temuan ini.");
+  if (!confirm(`Hapus barang temuan "${f.name}" secara permanen?\nTindakan ini dapat dibatalkan`)) return;
+  DB.matches
+    .filter((m) => m.found_item_id === id)
+    .forEach ((m) => {
+      const r = DB.reports.find((x) => x.id === m.lost_report_id);
+      if (r && r.status === "FOUND") r.status = "ACTIVE";
+    });
+  DB.matches = DB.matches.filter((m) => m.found_item_id !== id);
+  DB.found = DB.found.filter((x) => x.id !== id);
+  saveDB();
+  closeDlg();
+  toast("Barang temuan berhasil dihapus");
+  render();
+}
 
 function doMatch(f) {
   const r = +f.r.value;
@@ -1962,6 +2016,7 @@ function detail(id) {
     </dl>
     <div class="foot">
       <button class="btn ghost" onclick="$('dialog').close()">Tutup</button>
+      ${canDelete() ? `<button class="btn bad" onclick="deleteReport(${r.id})">Hapus Laporan</button>` : ""}
       <button class="btn" onclick="chatAbout(${r.id})">
         💬 Chat Admin tentang Barang Ini
       </button>
@@ -1992,6 +2047,7 @@ function detailFound(id) {
     </dl>
     <div class="foot">
       <button class="btn ghost" onclick="$('dialog').close()">Tutup</button>
+      ${canDeleteFound(f) ? `<button class="btn bad" onclick="deleteFound(${f.id})">Hapus Temuan</button>` : ""}
       ${ST.user && ST.user.role === "admin" && f.status === "PENDING_APPROVAL" ? `<button class="btn sm" onclick="accFoundItem(${f.id});$('dialog').close()">Setujui (ACC)</button>` : ""}
     </div>
   `);
