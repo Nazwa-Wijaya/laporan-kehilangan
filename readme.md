@@ -78,6 +78,8 @@ Mahasiswa dapat membuat laporan kehilangan melalui website. Barang temuan tidak 
 ---
 
 # 5. Alur Kerja Sistem
+![Uploading image.png…]()
+
 
 ## 5.1 Alur Laporan Barang Hilang
 
