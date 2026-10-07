@@ -632,6 +632,9 @@ h3.t {
 .RETURNED { color: var(--ret); background: var(--ret-bg); }
 .REJECTED { color: var(--rej); background: var(--rej-bg); }
 .EXPIRED { color: var(--exp); background: var(--exp-bg); }
+.PENDING_APPROVAL { color: var(--pending); background: var(--pending-bg); }
+.APPROVED { color: var(--active); background: var(--active-bg); }
+.MATCHED { color: var(--found); background: var(--found-bg); }
 
 .tw {
   overflow-x: auto;
@@ -811,8 +814,9 @@ dialog h2 {
 
 .chat {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 280px 1fr;
   overflow: hidden;
+  border-radius: 10px;
 }
 
 .chat.solo {
@@ -822,7 +826,17 @@ dialog h2 {
 .clist {
   border-right: 1px solid var(--line);
   overflow-y: auto;
-  max-height: 560px;
+  max-height: 600px;
+  background: var(--panel);
+}
+
+.clist-header {
+  padding: 12px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--mute);
 }
 
 .cu {
@@ -837,6 +851,7 @@ dialog h2 {
   background: none;
   padding: 12px 14px;
   cursor: pointer;
+  transition: background .15s;
 }
 
 .cu:hover {
@@ -845,6 +860,7 @@ dialog h2 {
 
 .cu.on {
   background: var(--soft);
+  border-left: 3px solid var(--pri);
 }
 
 .cu > span:first-child {
@@ -857,17 +873,98 @@ dialog h2 {
   white-space: nowrap;
 }
 
+.cu .item-tag {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--pri);
+  background: var(--soft);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-top: 3px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cth {
   display: flex;
   flex-direction: column;
-  height: 560px;
+  height: 600px;
   min-width: 0;
+  background: var(--panel);
 }
 
 .cth .who {
-  padding: 14px 18px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--line);
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--panel);
+}
+
+.chat-item-banner {
+  background: var(--soft);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.chat-item-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.chat-item-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--ph);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  color: var(--mute);
+  font-size: 18px;
+}
+
+.chat-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-item-text {
+  min-width: 0;
+}
+
+.chat-item-text b {
+  display: block;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+}
+
+.chat-item-text span {
+  font-size: 12px;
+  color: var(--mute);
+}
+
+.chat-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .cb {
@@ -876,19 +973,21 @@ dialog h2 {
   padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   background: var(--bg);
 }
 
 .msg {
-  max-width: 75%;
-  padding: 8px 12px;
-  border-radius: 12px;
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 14px;
   background: var(--panel);
   border: 1px solid var(--line);
   white-space: pre-wrap;
   word-break: break-word;
   align-self: flex-start;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  position: relative;
 }
 
 .msg.me {
@@ -898,24 +997,136 @@ dialog h2 {
   color: var(--pri-ink);
 }
 
+.msg-item-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--pri);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.msg.me .msg-item-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
 .msg time {
   display: block;
   font-size: 11px;
-  opacity: .7;
-  margin-top: 2px;
+  opacity: .75;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.quick-chips {
+  padding: 8px 14px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-chip {
+  background: var(--soft);
+  color: var(--pri);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 4px 11px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.quick-chip:hover {
+  background: var(--pri);
+  color: #fff;
+  border-color: var(--pri);
 }
 
 .cf {
   display: flex;
   gap: 8px;
-  padding: 12px;
+  padding: 12px 14px;
   border-top: 1px solid var(--line);
+  background: var(--panel);
 }
 
 .cf textarea {
   min-height: 44px;
   height: 44px;
   resize: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.info-banner {
+  background: var(--soft);
+  border-left: 4px solid var(--pri);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 20px;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.info-banner.warning {
+  border-left-color: var(--pending);
+  background: var(--pending-bg);
+  color: var(--pending);
+}
+
+.demo-box {
+  margin-top: 20px;
+  padding: 12px 14px;
+  background: var(--soft);
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px dashed var(--line);
+}
+
+.demo-box b {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.demo-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.demo-pill {
+  padding: 4px 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11.5px;
+}
+
+.demo-pill:hover {
+  border-color: var(--pri);
+  color: var(--pri);
+}
+
+.match-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  margin-bottom: 10px;
+  gap: 12px;
 }
 
 @media (max-width: 860px) {
@@ -928,6 +1139,6 @@ dialog h2 {
     max-height: 180px;
   }
   .cth {
-    height: 480px;
+    height: 520px;
   }
 }
