@@ -2092,10 +2092,13 @@ function submitVerifReturn(id) {
   const r = DB.reports.find((x) => x.id === id);
   setR(id, "RETURNED");
 
+  const match = DB.matches ? DB.matches.find((m) => m.lost_report_id === id) : null;
+  const foundId = match ? match.found_item_id : null;
+
   DB.returns.push({
     id: Date.now(),
     lost_report_id: id,
-    found_item_id: null,
+    found_item_id: foundId,
     user_id: r.uid,
     verified_by: ST.user.name,
     returned_at: new Date(),
