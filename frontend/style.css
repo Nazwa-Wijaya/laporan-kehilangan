@@ -120,14 +120,11 @@ svg.i {
   font-size: 16px;
 }
 
-.logo i {
+.logo img {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: #fff;
-  color: var(--side);
-  display: grid;
-  place-items: center;
+  object-fit: contain;
 }
 
 .hero h1 {
@@ -377,9 +374,9 @@ input[type=checkbox] {
   margin-bottom: 24px;
 }
 
-.adm .logo i {
-  background: var(--side);
-  color: #fff;
+.adm .logo img {
+  width: 44px;
+  height: 44px;
 }
 
 .app {

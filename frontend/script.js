@@ -103,7 +103,7 @@ const IC = {
   user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
 };
 
-const logo = `<div class="logo"><i>${ic(IC.logo)}</i>Lost & Found Kampus</div>`;
+const logo = `<div class="logo"><img src="assets/logo.png" alt="Logo Lost & Found Kampus">Lost & Found Kampus</div>`;
 
 // Sample Initial Database State
 const INITIAL_DB = {
@@ -536,14 +536,6 @@ function auth() {
             <button class="btn block">${reg ? "Daftar Akun Baru" : "Masuk"}</button>
           </form>
 
-          <div class="demo-box">
-            <b>⚡ Akun Demo Mahasiswa (Klik untuk isi cepat):</b>
-            <div class="demo-pills">
-              <span class="demo-pill" onclick="fillDemoUser('2211001')">👤 Rina (2211001)</span>
-              <span class="demo-pill" onclick="fillDemoUser('2211014')">👤 Dimas (2211014)</span>
-              <span class="demo-pill" onclick="fillDemoUser('2311020')">👤 Sari (2311020)</span>
-            </div>
-          </div>
 
           <p class="hint">Petugas atau Admin kampus? <a href="#/staff">Masuk ke Portal Staf</a></p>
         </div>
@@ -552,18 +544,7 @@ function auth() {
   `;
 }
 
-function fillDemoUser(nim) {
-  if (ST.auth === "reg") {
-    ST.auth = "login";
-    render();
-  }
-  const iNim = $("#nim");
-  const iPw = $("#pw");
-  if (iNim && iPw) {
-    iNim.value = nim;
-    iPw.value = "12345";
-  }
-}
+
 
 // Staff (Petugas & Admin) Login
 function authStaff() {
@@ -585,13 +566,7 @@ function authStaff() {
           <button class="btn block">Masuk ke Panel Staf</button>
         </form>
 
-        <div class="demo-box" style="margin-top:18px">
-          <b>⚡ Akun Demo Staf (Klik untuk isi):</b>
-          <div class="demo-pills">
-            <span class="demo-pill" onclick="$('#su').value='petugas';$('#sp').value='petugas123'">🛡️ Petugas (Budi Santoso)</span>
-            <span class="demo-pill" onclick="$('#su').value='admin';$('#sp').value='admin123'">🔑 Admin (Kemahasiswaan)</span>
-          </div>
-        </div>
+
 
         <p class="hint"><a href="#/masuk">&larr; Kembali ke login mahasiswa</a></p>
       </div>
