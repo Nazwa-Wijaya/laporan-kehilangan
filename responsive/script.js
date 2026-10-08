@@ -867,6 +867,38 @@ function doMatch(f) {
   app();
 }
 
+// ===== FITUR HAPUS LAPORAN (Admin & Petugas) =====
+const canDelete = () =>
+  !!ST.user && (ST.user.role === "admin");
+
+function closeDlg() {
+  const e = $("dialog");
+  if (e && e.open) e.close();
+}
+
+function deleteReport(id, ok) {
+  if (!canDelete()) return toast("Anda tidak memiliki izin menghapus laporan.");
+  const r = DB.reports.find((x) => x.id === id);
+  if (!r) return;
+
+  // Panggilan pertama: tampilkan dialog konfirmasi
+  if (!ok) {
+    dlg(`<h2>Hapus laporan?</h2>
+      <p class="meta">"${esc(r.name)}" milik ${esc(uname(r.uid))} akan dihapus permanen dan tidak dapat dibatalkan.</p>
+      <div class="foot">
+        <button class="btn ghost" onclick="closeDlg()">Batal</button>
+        <button class="btn bad" onclick="deleteReport(${id}, true)">Ya, Hapus</button>
+      </div>`);
+    return;
+  }
+
+  // Panggilan kedua (sudah dikonfirmasi): hapus
+  DB.reports = DB.reports.filter((x) => x.id !== id);
+  closeDlg();
+  toast("Laporan berhasil dihapus.");
+  app();
+}
+
 function dlg(h) {
   const e = $("dialog");
   if (e) e.remove();
@@ -882,7 +914,7 @@ function detail(id) {
   if (!r) return;
   dlg(`<div class="ph" style="border-radius:8px;margin-bottom:16px">${ic(IC.photo)}</div>${badge(r.status)}<h2 style="margin-top:8px">${r.name}</h2><p class="meta" style="margin:0 0 16px">${r.cat}</p>
 <dl class="dl"><dt>Warna</dt><dd>${r.color || "-"}</dd><dt>Merk</dt><dd>${r.brand || "-"}</dd><dt>Lokasi terakhir</dt><dd>${r.loc}</dd><dt>Tanggal hilang</dt><dd>${fmt(r.date)}</dd><dt>Deskripsi</dt><dd>${r.desc}</dd>${ST.user && ST.user.role === "admin" ? `<dt>Pelapor</dt><dd>${uname(r.uid)}</dd>` : ""}${r.appr ? `<dt>Berlaku sampai</dt><dd>${fmt(exp(r))}</dd>` : ""}</dl>
-<div class="foot"><button class="btn ghost" onclick="$('dialog').close()">Tutup</button>${ST.user && (ST.user.role === "admin" || ST.user.id === r.uid) ? `<button class="btn" onclick="chatWith(${r.uid},${r.id})">${ST.user.role === "admin" ? "Hubungi pelapor" : "Hubungi admin"}</button>` : ""}</div>`);
+<div class="foot"><button class="btn ghost" onclick="$('dialog').close()">Tutup</button>${canDelete() ? `<button class="btn bad" onclick="deleteReport(${r.id})">Hapus laporan</button>` : ""}${ST.user && (ST.user.role === "admin" || ST.user.id === r.uid) ? `<button class="btn" onclick="chatWith(${r.uid},${r.id})">${ST.user.role === "admin" ? "Hubungi pelapor" : "Hubungi admin"}</button>` : ""}</div>`);
 }
 
 function verif(id) {
